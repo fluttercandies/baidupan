@@ -1,3 +1,9 @@
+# CHANGELOG
+
+## 1.0.1
+
+- 清理了代码
+
 ## 1.0.0
 
-- Initial version, created by Stagehand
+- 第一个版本, 接入了大部分代码

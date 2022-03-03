@@ -1,6 +1,8 @@
 # BaiduPan
 
-百度网盘的 API, 可以帮助对接 Baidu 网盘
+百度网盘的 API, 可以帮助在 dart 中对接百度网盘
+
+目前理论上不支持 **web**， 因为引入了 dart:io 包
 
 有一些未对接的接口可以查看 [官方文档](https://pan.baidu.com/union/doc/nksg0sbfs)
 
