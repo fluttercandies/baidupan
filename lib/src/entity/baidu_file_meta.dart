@@ -18,11 +18,11 @@ class BaiduFileMetaList {
 
   factory BaiduFileMetaList.fromJson(Map<String, dynamic> json) =>
       BaiduFileMetaList(
-        errmsg: json["errmsg"],
-        errno: json["errno"],
+        errmsg: json['errmsg'],
+        errno: json['errno'],
         list: List<BaiduFileMetaItem>.from(
-            json["list"].map((x) => BaiduFileMetaItem.fromJson(x))),
-        requestId: json["request_id"],
+            json['list'].map((x) => BaiduFileMetaItem.fromJson(x))),
+        requestId: json['request_id'],
       );
 }
 

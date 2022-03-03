@@ -20,8 +20,6 @@ class BaiduPanFileManager with BaiduPanMixin {
     List<CopyOrMoveItem> items, {
     OnDuplicateAction? onDuplicateAction,
   }) async {
-    final path = 'rest/2.0/xpan/file';
-
     final params = {
       'opera': 'copy',
     };
@@ -44,8 +42,6 @@ class BaiduPanFileManager with BaiduPanMixin {
     List<CopyOrMoveItem> items, {
     OnDuplicateAction? onDuplicateAction,
   }) async {
-    final path = 'rest/2.0/xpan/file';
-
     final params = {
       'opera': 'move',
     };
@@ -68,8 +64,6 @@ class BaiduPanFileManager with BaiduPanMixin {
     List<RenameItem> items, {
     OnDuplicateAction? onDuplicateAction,
   }) async {
-    final path = 'rest/2.0/xpan/file';
-
     final params = {
       'opera': 'rename',
     };
@@ -92,8 +86,6 @@ class BaiduPanFileManager with BaiduPanMixin {
     List<String> items, {
     OnDuplicateAction? onDuplicateAction,
   }) async {
-    final path = 'rest/2.0/xpan/file';
-
     final params = {
       'opera': 'delete',
     };
