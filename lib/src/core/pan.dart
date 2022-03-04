@@ -72,7 +72,7 @@ mixin BaiduPanMixin {
     if (showLog) {
       print('uri: $uri');
       print('body: $body');
-      print('response body: ${responseBody}');
+      print('response body: $responseBody');
     }
 
     if (map['errno'] != 0) {

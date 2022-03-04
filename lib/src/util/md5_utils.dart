@@ -1,6 +1,4 @@
-import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
 
@@ -53,6 +51,7 @@ class Md5Utils {
     return result;
   }
 
+  // ignore: unused_element
   static Digest _convert(List<int> data) {
     var innerSink = _DigestSink();
     var outerSink = md5.startChunkedConversion(innerSink);

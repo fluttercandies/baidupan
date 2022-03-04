@@ -59,7 +59,7 @@ class BaiduPanUploadManager with BaiduPanMixin {
     final body = <String, String>{
       'path': Uri.encodeComponent(remotePath),
       // 'path': remotePath,
-      'autoinit': "1",
+      'autoinit': '1',
       'rtype': rtype.index.toString(),
     };
 
@@ -242,34 +242,6 @@ class BaiduPanUploadManager with BaiduPanMixin {
 
     return UploadSuccess.fromJson(map);
   }
-
-  String _findRealPath(String localPath) {
-    if (FileSystemEntity.isLinkSync(localPath)) {
-      var link = Link(localPath);
-      var target = link.targetSync();
-      while (FileSystemEntity.isLinkSync(target)) {
-        link = Link(target);
-        target = link.targetSync();
-      }
-
-      localPath = target;
-    }
-    return localPath;
-  }
-
-// String _getTarget(String localPath) {
-//   if (!FileSystemEntity.isLinkSync(localPath)) {
-//     return localPath;
-//   }
-//
-//   final srcUri = Uri.file(localPath);
-//   final targetPathSegments = srcUri.pathSegments.sublist(
-//     0,
-//     srcUri.pathSegments.length - 1,
-//   );
-//
-//   final targetUri = Uri.parse(srcUri);
-// }
 }
 
 /// 上传文件的命名策略
