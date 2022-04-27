@@ -1,6 +1,6 @@
 name: baidupan
 description: For wrapper baidu netdisk api with dart, user can use the package to query, update ,upload or download for baidu netdisk.
-version: 1.0.0
+version: 1.0.2
 homepage: https://github.com/Caijinglong/baidupan
 
 environment:

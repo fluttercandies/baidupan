@@ -80,6 +80,9 @@ class BaiduUploadHelper with ILogger {
 
   String? _uploadId;
 
+  /// 共有多少个文件块
+  int totalBlockCount = 0;
+
   /// 获取应该被保存的 map
   Map<String, dynamic> saveProgress() {
     if (_uploadId == null) {
@@ -165,6 +168,8 @@ class BaiduUploadHelper with ILogger {
 
     final uploadId = preCreate.uploadId;
     _uploadId = uploadId;
+
+    totalBlockCount = preCreate.blockList.length;
 
     for (final blockIndex in preCreate.blockList) {
       if (_blockMd5Map.containsKey(blockIndex)) {
