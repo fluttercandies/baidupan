@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.0.4
+
+- 修复了一处 `BaiduUploadHelper` 恢复进度的 bug
+
 ## 1.0.3
 
 - 修复 bug： `BaiduUploadHelper`

@@ -119,8 +119,6 @@ class BaiduUploadHelper with ILogger {
       final block = _PartBlock.fromMap(e);
       _blockMd5Map[block.block] = block.md5;
     });
-
-    _blockMd5Map.addAll(progress['uploadedBlocks']);
   }
 
   /// 保存进度到文件
