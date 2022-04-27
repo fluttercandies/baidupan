@@ -67,10 +67,8 @@ class BaiduUploadHelper with ILogger {
   final Map<int, String> _blockMd5Map = {};
 
   /// 已上传的文件块
-  Map<int, String> get uploadedBlocks {
-    return LinkedHashMap.fromEntries(
-      _blockMd5Map.entries.toList()..sort((a, b) => a.key - b.key),
-    );
+  List<_PartBlock> get uploadedBlocks {
+    return _blockMd5Map.entries.map((e) => _PartBlock(e.key, e.value)).toList();
   }
 
   bool _isUploading = false;
@@ -83,6 +81,9 @@ class BaiduUploadHelper with ILogger {
   /// 共有多少个文件块
   int totalBlockCount = 0;
 
+  /// uploadCount 已上传的文件块数量
+  int uploadCount = 0;
+
   /// 获取应该被保存的 map
   Map<String, dynamic> saveProgress() {
     if (_uploadId == null) {
@@ -91,7 +92,7 @@ class BaiduUploadHelper with ILogger {
 
     return {
       'uploadId': _uploadId,
-      'uploadedBlocks': uploadedBlocks,
+      'uploadedBlocks': uploadedBlocks.map((e) => e.toJson()).toList(),
       'localPath': localPath,
       'remotePath': remotePath,
       'memberLevel': memberLevel,
@@ -113,6 +114,13 @@ class BaiduUploadHelper with ILogger {
     }
 
     _uploadId = progress['uploadId'];
+
+    final uploadedBlocks = progress['uploadedBlocks'] as List;
+    uploadedBlocks.forEach((e) {
+      final block = _PartBlock.fromMap(e);
+      _blockMd5Map[block.block] = block.md5;
+    });
+
     _blockMd5Map.addAll(progress['uploadedBlocks']);
   }
 
@@ -185,6 +193,7 @@ class BaiduUploadHelper with ILogger {
       );
 
       _blockMd5Map[blockIndex] = block.md5;
+      uploadCount++;
       uploadHandler?.onUploadPartComplete(this, blockIndex, block.md5);
     }
 
@@ -233,4 +242,22 @@ mixin UploadHelperListener {
     Object error,
     StackTrace stackTrace,
   ) {}
+}
+
+class _PartBlock {
+  final int block;
+  final String md5;
+
+  _PartBlock(this.block, this.md5);
+
+  _PartBlock.fromMap(Map map)
+      : block = map['block'] as int,
+        md5 = map['md5'] as String;
+
+  Map<String, dynamic> toJson() {
+    return {
+      'block': block,
+      'md5': md5,
+    };
+  }
 }

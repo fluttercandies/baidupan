@@ -1,8 +1,13 @@
 # CHANGELOG
 
+## 1.0.3
+
+- 修复 bug： `BaiduUploadHelper`
+- 为 `BaiduUploadHelper` 添加 `uploadCount` 来标识本地上传的数量
+
 ## 1.0.2
 
-- 为 [BaiduUploadHelper] 添加了一个 totalBlockCount 用来标识文件块的数量
+- 为 `BaiduUploadHelper` 添加了一个 `totalBlockCount` 用来标识文件块的数量
 
 ## 1.0.1
 
