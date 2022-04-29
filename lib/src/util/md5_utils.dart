@@ -70,6 +70,44 @@ class Md5Utils {
   }
 }
 
+class BaiduMd5 {
+  final String filePath;
+  final int memberLevel;
+
+  BaiduMd5({
+    required this.filePath,
+    required this.memberLevel,
+  });
+
+  int _getBlockSize(int memberLevel) {
+    int blockSize;
+
+    switch (memberLevel) {
+      case 1:
+        blockSize = 16 * 1024 * 1024;
+        break;
+      case 2:
+        blockSize = 32 * 1024 * 1024;
+        break;
+      default:
+        blockSize = 4 * 1024 * 1024;
+    }
+    return blockSize;
+  }
+
+  List<String> get blockMd5List {
+    final blockSize = _getBlockSize(memberLevel);
+    return Md5Utils.getBlockList(
+      filePath,
+      blockSize,
+    );
+  }
+
+  String get contentMd5 => Md5Utils.getFileMd5(filePath);
+
+  String get sliceMd5 => Md5Utils.getFileSliceMd5(filePath, 256 * 1024);
+}
+
 class _DigestSink extends Sink<Digest> {
   /// The value added to the sink.
   ///

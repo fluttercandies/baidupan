@@ -51,6 +51,9 @@ class BaiduPanUploadManager with BaiduPanMixin {
     UploadRenameRtype rtype = UploadRenameRtype.none,
     required int memberLevel,
     String? uploadid,
+    List<String>? blockMd5List,
+    String? contentMd5,
+    String? sliceMd5,
   }) async {
     final path = 'rest/2.0/xpan/file';
     final method = 'precreate';
@@ -99,17 +102,17 @@ class BaiduPanUploadManager with BaiduPanMixin {
       throw Exception('不支持的类型');
     }
 
-    final blockSize = _getBlockSize(memberLevel);
-
-    final blockMd5 = Md5Utils.getBlockList(
-      localPath,
-      blockSize,
+    final baiduMd5 = BaiduMd5(
+      filePath: localPath,
+      memberLevel: memberLevel,
     );
+
+    final blockMd5 = blockMd5List ?? baiduMd5.blockMd5List;
 
     body['block_list'] = json.encode(blockMd5);
 
-    body['content-md5'] = Md5Utils.getFileMd5(localPath);
-    body['slice-md5'] = Md5Utils.getFileSliceMd5(localPath, 256 * 1024);
+    body['content-md5'] = contentMd5 ?? baiduMd5.contentMd5;
+    body['slice-md5'] = sliceMd5 ?? baiduMd5.sliceMd5;
 
     final now = DateTime.now().millisecondsSinceEpoch / 1000;
     body['local_ctime'] = now.toString();
