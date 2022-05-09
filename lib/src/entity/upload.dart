@@ -19,10 +19,11 @@ class PreCreate {
   });
 
   factory PreCreate.fromJson(Map json) {
+    final List<int> blockList = json['block_list'];
     return PreCreate(
       path: json['path'],
       returnType: json['return_type'],
-      blockList: json['block_list'].cast<int>(),
+      blockList: blockList,
       errno: json['errno'],
       requestId: json['request_id'],
       uploadId: json['uploadid'],
