@@ -19,7 +19,8 @@ class PreCreate {
   });
 
   factory PreCreate.fromJson(Map json) {
-    final List<int> blockList = json['block_list'];
+    final _blockValue = json['block_list'] as List;
+    final blockList = _blockValue.whereType<int>().toList();
     return PreCreate(
       path: json['path'],
       returnType: json['return_type'],
