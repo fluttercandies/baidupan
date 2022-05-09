@@ -54,22 +54,25 @@ class BaiduUploadHelper with ILogger {
   /// 百度网盘的accessToken
   final String accessToken;
 
-  /// 本地文件的路径
+  /// 本地文件的路径， 保存进度的一部分
   final String localPath;
 
-  /// 网盘的路径
+  /// 网盘的路径， 保存进度的一部分
   final String remotePath;
 
-  /// 会员等级： 0 为非会员，1 为普通会员，2 为超级会员
+  /// 会员等级： 0 为非会员，1 为普通会员，2 为超级会员， 保存进度的一部分
   final int memberLevel;
 
-  /// 记录已上传部分的md5码
+  /// 记录已上传部分的md5码， 保存进度的一部分
   final Map<int, String> _blockMd5Map = {};
 
-  /// 已上传的文件块
+  /// 已上传的文件块， 保存进度的一部分
   List<_PartBlock> get uploadedBlocks {
     return _blockMd5Map.entries.map((e) => _PartBlock(e.key, e.value)).toList();
   }
+
+  /// 上传的文件 md5 值， 保存进度的一部分
+  BaiduMd5? _md5;
 
   bool _isUploading = false;
 
@@ -116,6 +119,7 @@ class BaiduUploadHelper with ILogger {
       'localPath': localPath,
       'remotePath': remotePath,
       'memberLevel': memberLevel,
+      'md5': _md5?.toMap(),
     };
   }
 
@@ -124,6 +128,13 @@ class BaiduUploadHelper with ILogger {
     final localPath = progress['localPath'] as String;
     final remotePath = progress['remotePath'] as String;
     final memberLevel = progress['memberLevel'] as int;
+    final saveFileLength = progress['saveFileLength'] as int;
+
+    if (saveFileLength != fileTotalSize) {
+      throw Exception('文件大小不一致，可能文件已经被修改，不支持续传');
+    }
+
+    // 读取上传的文件的 md5 码
 
     if (localPath != this.localPath || remotePath != this.remotePath) {
       throw Exception('localPath or remotePath is not equal');
@@ -140,6 +151,9 @@ class BaiduUploadHelper with ILogger {
       final block = _PartBlock.fromMap(e);
       _blockMd5Map[block.block] = block.md5;
     });
+
+    // 恢复生成的 md5 值
+    _md5 = BaiduMd5.fromMap(progress['md5']);
   }
 
   /// 保存进度到文件
@@ -185,11 +199,15 @@ class BaiduUploadHelper with ILogger {
 
   Future<void> _upload(UploadHelperListener? uploadHandler) async {
     final uploader = BaiduPanUploadManager(accessToken: accessToken);
+
+    _md5 ??= BaiduMd5(filePath: localPath, memberLevel: memberLevel);
+
     final preCreate = await uploader.preCreate(
       remotePath: remotePath,
       localPath: localPath,
       memberLevel: memberLevel,
       uploadid: _uploadId,
+      md5: _md5,
     );
 
     final uploadId = preCreate.uploadId;
