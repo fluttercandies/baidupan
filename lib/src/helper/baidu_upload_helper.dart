@@ -201,8 +201,11 @@ class BaiduUploadHelper with ILogger {
     stopwatch.start();
     var uploadBytes = 0;
 
+    uploadCount = 0;
+
     for (final blockIndex in preCreate.blockList) {
       if (_blockMd5Map.containsKey(blockIndex)) {
+        uploadCount++;
         log('已经上传过的块：$blockIndex, 跳过');
         continue;
       }
