@@ -119,6 +119,7 @@ class BaiduUploadHelper with ILogger {
       'localPath': localPath,
       'remotePath': remotePath,
       'memberLevel': memberLevel,
+      'saveFileLength': fileTotalSize,
       'md5': _md5?.toMap(),
     };
   }
