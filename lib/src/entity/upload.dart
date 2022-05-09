@@ -34,16 +34,19 @@ class PreCreate {
 class UploadPart {
   final String md5;
   final int requestId;
+  final int blockSize;
 
   UploadPart({
     required this.md5,
     required this.requestId,
+    required this.blockSize,
   });
 
-  factory UploadPart.fromJson(Map json) {
+  factory UploadPart.fromJson(Map json, int fileSize) {
     return UploadPart(
       md5: json['md5'],
       requestId: json['request_id'],
+      blockSize: fileSize,
     );
   }
 }

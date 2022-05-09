@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:baidupan/src/util/pan_utils.dart';
 import 'package:crypto/crypto.dart';
 
 class Md5Utils {
@@ -79,21 +80,7 @@ class BaiduMd5 {
     required this.memberLevel,
   });
 
-  int _getBlockSize(int memberLevel) {
-    int blockSize;
-
-    switch (memberLevel) {
-      case 1:
-        blockSize = 16 * 1024 * 1024;
-        break;
-      case 2:
-        blockSize = 32 * 1024 * 1024;
-        break;
-      default:
-        blockSize = 4 * 1024 * 1024;
-    }
-    return blockSize;
-  }
+  int _getBlockSize(int memberLevel) => PanUtils.getBlockSize(memberLevel);
 
   List<String> get blockMd5List {
     final blockSize = _getBlockSize(memberLevel);

@@ -2,10 +2,11 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:baidupan/baidupan.dart';
+import 'package:baidupan/src/util/pan_utils.dart';
 
 /// 对于上传百度网盘的包装类
 ///
-/// 用于支持续传，而不要求一次性全传完
+/// 用于支持续传，在网络出错或上传合成失败的情况下，也可以重新上传
 class BaiduUploadHelper with ILogger {
   /// 百度网盘上传的包装类
   ///
@@ -82,6 +83,26 @@ class BaiduUploadHelper with ILogger {
 
   /// uploadCount 已上传的文件块数量
   int uploadCount = 0;
+
+  /// 文件大小 [File.lengthSync]
+  int get fileTotalSize => File(localPath).lengthSync();
+
+  /// 上传的速度，单位为字节/秒
+  int uploadSpeed = 0;
+
+  /// 上传的进度, 范围为 0.0 - 1.0
+  double getProgress() {
+    if (totalBlockCount == 0) {
+      return 0.0;
+    }
+    // 文件块的总数量
+    final blockSize = PanUtils.getBlockSize(memberLevel);
+
+    // 获取已上传的文件块数量，并计算总上传的字节数
+    final totalUploadBytes = blockSize * uploadCount;
+
+    return totalUploadBytes / fileTotalSize;
+  }
 
   /// 获取应该被保存的 map
   Map<String, dynamic> saveProgress() {
@@ -176,6 +197,10 @@ class BaiduUploadHelper with ILogger {
 
     totalBlockCount = preCreate.blockList.length;
 
+    final stopwatch = Stopwatch();
+    stopwatch.start();
+    var uploadBytes = 0;
+
     for (final blockIndex in preCreate.blockList) {
       if (_blockMd5Map.containsKey(blockIndex)) {
         log('已经上传过的块：$blockIndex, 跳过');
@@ -189,10 +214,15 @@ class BaiduUploadHelper with ILogger {
         partseq: blockIndex,
       );
 
+      final uploadTimeMs = stopwatch.elapsedMilliseconds;
+      uploadBytes += block.blockSize;
+      uploadSpeed = uploadBytes ~/ uploadTimeMs;
+
       _blockMd5Map[blockIndex] = block.md5;
       uploadCount++;
       uploadHandler?.onUploadPartComplete(this, blockIndex, block.md5);
     }
+    stopwatch.stop();
 
     final md5List = _blockMd5Map.entries.toList();
     md5List.sort((a, b) => a.key.compareTo(b.key));
@@ -213,27 +243,32 @@ class BaiduUploadHelper with ILogger {
 ///
 /// 按需自行覆盖对应的方法
 ///
-/// [onUploadStart]: 开始上传
+/// [onUploadStart] :开始上传
 ///
-/// [onUploadPartComplete]: 上传一个块完毕后的回调
+/// [onUploadPartComplete] :上传一个块完毕后的回调
 ///
-/// [onUploadComplete]: 上传完成时的回调
+/// [onUploadComplete] :上传完成时的回调
 ///
-/// [onUploadError]: 上传出错时的回调
+/// [onUploadError] :上传出错时的回调
 mixin UploadHelperListener {
   /// 上传开始
   void onUploadStart(BaiduUploadHelper helper) {}
 
+  /// 一个块上传完成的回调
+  ///
+  /// [index] 为块索引， [md5] 为块的md5
   void onUploadPartComplete(
     BaiduUploadHelper helper,
     int index,
     String md5,
   ) {}
 
+  /// 上传完成的回调
   void onUploadComplete(
     BaiduUploadHelper helper,
   ) {}
 
+  /// 上传出错的回调
   void onUploadError(
     BaiduUploadHelper helper,
     Object error,

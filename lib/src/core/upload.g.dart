@@ -131,21 +131,7 @@ class BaiduPanUploadManager with BaiduPanMixin {
     return PreCreate.fromJson(map);
   }
 
-  int _getBlockSize(int memberLevel) {
-    int blockSize;
-
-    switch (memberLevel) {
-      case 1:
-        blockSize = 16 * 1024 * 1024;
-        break;
-      case 2:
-        blockSize = 32 * 1024 * 1024;
-        break;
-      default:
-        blockSize = 4 * 1024 * 1024;
-    }
-    return blockSize;
-  }
+  int _getBlockSize(int memberLevel) => PanUtils.getBlockSize(memberLevel);
 
   Future<UploadPart> uploadSinglePart({
     required String remotePath,
@@ -206,7 +192,7 @@ class BaiduPanUploadManager with BaiduPanMixin {
     final body = await utf8.decodeStream(response.stream);
     final map = json.decode(body);
 
-    return UploadPart.fromJson(map);
+    return UploadPart.fromJson(map, uploadBytes.length);
   }
 
   /// 合并分片文件，并创建远端文件

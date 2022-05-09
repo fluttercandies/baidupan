@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## 1.0.5
+
+- 为上传的分块数据 [UploadPart] 添加了 `blockSize`, 用于表示分块大小。
+
+- 为 [BaiduUploadHelper] 添加了几个参数
+
+  - fileTotalSize: 文件总大小
+  - uploadSpeed: 上传速度
+  - getProgress: 上传进度
+
 ## 1.0.4
 
 - 修复了一处 `BaiduUploadHelper` 恢复进度的 bug
