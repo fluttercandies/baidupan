@@ -123,7 +123,8 @@ class BaiduMd5 {
       filePath: map['filePath'],
       memberLevel: map['memberLevel'],
     );
-    instance._blockMd5List = map['blockMd5List'];
+    instance._blockMd5List =
+        (map['blockMd5List'] as List).whereType<String>().toList();
     instance._contentMd5 = map['contentMd5'];
     instance._sliceMd5 = map['sliceMd5'];
     return instance;
