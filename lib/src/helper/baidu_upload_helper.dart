@@ -216,7 +216,7 @@ class BaiduUploadHelper with ILogger {
 
       final uploadTimeMs = stopwatch.elapsedMilliseconds;
       uploadBytes += block.blockSize;
-      uploadSpeed = uploadBytes ~/ uploadTimeMs;
+      uploadSpeed = uploadBytes ~/ (uploadTimeMs / 1000);
 
       _blockMd5Map[blockIndex] = block.md5;
       uploadCount++;
