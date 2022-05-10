@@ -4,6 +4,8 @@
 class PreCreate {
   final String? path;
   final int returnType;
+
+  /// 文件块的 index 数组，理论上这个为空数组时，表示不需要上传文件块，可以支持秒传
   final List<int> blockList;
   final int errno;
   final int requestId;
@@ -19,8 +21,15 @@ class PreCreate {
   });
 
   factory PreCreate.fromJson(Map json) {
-    final _blockValue = json['block_list'] as List;
-    final blockList = _blockValue.whereType<int>().toList();
+    List<int> blockList;
+    final blockJson = json['block_list'];
+    if (blockJson != null) {
+      final _blockValue = blockJson as List;
+      blockList = _blockValue.whereType<int>().toList();
+    } else {
+      blockList = [];
+    }
+
     return PreCreate(
       path: json['path'],
       returnType: json['return_type'],
