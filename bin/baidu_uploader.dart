@@ -23,12 +23,24 @@ Future<void> main() async {
 
     final blockMd5List = <UploadPart>[];
 
+    if (preCreate.fastUpload) {
+      // 快速上传
+      print('秒传成功');
+      return;
+    }
+
+    final uploadId = preCreate.uploadId;
+
+    if (uploadId == null) {
+      throw Exception('uploadId is null');
+    }
+
     for (final blockIndex in preCreate.blockList) {
       final part = await uploaderManager.uploadSinglePart(
         remotePath: remotePath,
         localPath: localFilePath,
         memberLevel: memberLevel,
-        uploadid: preCreate.uploadId,
+        uploadid: uploadId,
         partseq: blockIndex,
       );
 
@@ -40,7 +52,7 @@ Future<void> main() async {
     await uploaderManager.merge(
       remotePath: remotePath,
       localPath: localFilePath,
-      uploadid: preCreate.uploadId,
+      uploadid: uploadId,
       blockMd5List: blockMd5List.map((e) => e.md5).toList(),
     );
   } catch (e, st) {
