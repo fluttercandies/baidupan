@@ -50,6 +50,18 @@ Future<void> main(List<String> args) async {
     memberLevel: memberLevel,
   );
 
+  if (preCreate.fastUpload) {
+    // 快速上传
+    print('秒传成功');
+    return;
+  }
+
+  final uploadId = preCreate.uploadId;
+
+  if (uploadId == null) {
+    throw Exception('uploadId is null');
+  }
+
   final blockMd5List = <String>[];
 
   for (final index in preCreate.blockList) {
@@ -57,7 +69,7 @@ Future<void> main(List<String> args) async {
       remotePath: remotePath,
       localPath: localPath,
       memberLevel: memberLevel,
-      uploadid: preCreate.uploadId,
+      uploadid: uploadId,
       partseq: index,
     );
 
@@ -68,7 +80,7 @@ Future<void> main(List<String> args) async {
   final completeUpload = await uploader.merge(
     remotePath: remotePath,
     localPath: localPath,
-    uploadid: preCreate.uploadId,
+    uploadid: uploadId,
     blockMd5List: blockMd5List,
   );
 
