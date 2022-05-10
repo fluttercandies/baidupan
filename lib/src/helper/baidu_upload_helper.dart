@@ -16,10 +16,10 @@ class BaiduUploadHelper with ILogger {
   /// [memberLevel] 百度网盘的用户等级
   BaiduUploadHelper({
     required this.accessToken,
-    required this.localPath,
+    required String localPath,
     required this.remotePath,
     required this.memberLevel,
-  });
+  }) : localPath = File(localPath).absolute.path;
 
   /// [accessToken] 百度网盘的token
   /// [resumeMap] 续传的map, 一般由 [saveProgress] 返回
@@ -63,14 +63,6 @@ class BaiduUploadHelper with ILogger {
   /// 会员等级： 0 为非会员，1 为普通会员，2 为超级会员， 保存进度的一部分
   final int memberLevel;
 
-  /// 记录已上传部分的md5码， 保存进度的一部分
-  final Map<int, String> _blockMd5Map = {};
-
-  /// 已上传的文件块， 保存进度的一部分
-  List<_PartBlock> get uploadedBlocks {
-    return _blockMd5Map.entries.map((e) => _PartBlock(e.key, e.value)).toList();
-  }
-
   /// 上传的文件 md5 值， 保存进度的一部分
   BaiduMd5? _md5;
 
@@ -93,8 +85,11 @@ class BaiduUploadHelper with ILogger {
   /// 共有多少个文件块
   int totalBlockCount = 0;
 
-  /// uploadCount 已上传的文件块数量
+  /// uploadCount 已上传的文件块数量，会被保存到 progress 里
   int uploadCount = 0;
+
+  /// 当前上传的文件块数量
+  int currentUploadCount = 0;
 
   /// 文件大小 [File.lengthSync]
   int get fileTotalSize => File(localPath).lengthSync();
@@ -113,7 +108,13 @@ class BaiduUploadHelper with ILogger {
     // 获取已上传的文件块数量，并计算总上传的字节数
     final totalUploadBytes = blockSize * uploadCount;
 
-    return totalUploadBytes / fileTotalSize;
+    final progress = totalUploadBytes / fileTotalSize;
+
+    if (progress > 1.0) {
+      return 1.0;
+    }
+
+    return progress;
   }
 
   /// 获取应该被保存的 map
@@ -124,12 +125,12 @@ class BaiduUploadHelper with ILogger {
 
     return {
       'uploadId': _uploadId,
-      'uploadedBlocks': uploadedBlocks.map((e) => e.toJson()).toList(),
-      'localPath': File(localPath).absolute.path,
+      'localPath': localPath,
       'remotePath': remotePath,
       'memberLevel': memberLevel,
       'saveFileLength': fileTotalSize,
       'md5': md5.toMap(),
+      'uploadCount': uploadCount,
     };
   }
 
@@ -156,14 +157,10 @@ class BaiduUploadHelper with ILogger {
 
     _uploadId = progress['uploadId'];
 
-    final uploadedBlocks = progress['uploadedBlocks'] as List;
-    uploadedBlocks.forEach((e) {
-      final block = _PartBlock.fromMap(e);
-      _blockMd5Map[block.block] = block.md5;
-    });
-
     // 恢复生成的 md5 值
     _md5 = BaiduMd5.fromMap(progress['md5']);
+
+    uploadCount = progress['uploadCount'] as int;
   }
 
   /// 保存进度到文件
@@ -210,8 +207,6 @@ class BaiduUploadHelper with ILogger {
   Future<void> _upload(UploadHelperListener? uploadHandler) async {
     final uploader = BaiduPanUploadManager(accessToken: accessToken);
 
-    final localPath = File(this.localPath).absolute.path;
-
     final preCreate = await uploader.preCreate(
       remotePath: remotePath,
       localPath: localPath,
@@ -232,14 +227,9 @@ class BaiduUploadHelper with ILogger {
     stopwatch.start();
     var uploadBytes = 0;
 
-    uploadCount = 0;
+    currentUploadCount = 0;
 
     for (final blockIndex in preCreate.blockList) {
-      if (_blockMd5Map.containsKey(blockIndex)) {
-        uploadCount++;
-        log('已经上传过的块：$blockIndex, 跳过');
-        continue;
-      }
       final block = await uploader.uploadSinglePart(
         remotePath: remotePath,
         localPath: localPath,
@@ -248,19 +238,18 @@ class BaiduUploadHelper with ILogger {
         partseq: blockIndex,
       );
 
+      currentUploadCount++;
+      uploadCount++;
+
       final uploadTimeMs = stopwatch.elapsedMilliseconds;
       uploadBytes += block.blockSize;
       uploadSpeed = uploadBytes ~/ (uploadTimeMs / 1000);
 
-      _blockMd5Map[blockIndex] = block.md5;
-      uploadCount++;
       uploadHandler?.onUploadPartComplete(this, blockIndex, block.md5);
     }
     stopwatch.stop();
 
-    final md5List = _blockMd5Map.entries.toList();
-    md5List.sort((a, b) => a.key.compareTo(b.key));
-    final blockMd5List = md5List.map((e) => e.value).toList();
+    final blockMd5List = md5.blockMd5List;
 
     final complete = await uploader.merge(
       remotePath: remotePath,
@@ -311,22 +300,4 @@ mixin UploadHelperListener {
     Object error,
     StackTrace stackTrace,
   ) {}
-}
-
-class _PartBlock {
-  final int block;
-  final String md5;
-
-  _PartBlock(this.block, this.md5);
-
-  _PartBlock.fromMap(Map map)
-      : block = map['block'] as int,
-        md5 = map['md5'] as String;
-
-  Map<String, dynamic> toJson() {
-    return {
-      'block': block,
-      'md5': md5,
-    };
-  }
 }

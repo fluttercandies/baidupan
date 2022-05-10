@@ -80,20 +80,6 @@ class BaiduMd5 {
     required this.memberLevel,
   });
 
-  List<String>? _blockMd5List;
-
-  List<String> get blockMd5List {
-    if (_blockMd5List != null) {
-      return _blockMd5List!;
-    }
-
-    final blockSize = PanUtils.getBlockSize(memberLevel);
-    return Md5Utils.getBlockList(
-      filePath,
-      blockSize,
-    );
-  }
-
   String? _contentMd5;
 
   String get contentMd5 {
@@ -106,6 +92,22 @@ class BaiduMd5 {
   String get sliceMd5 {
     _sliceMd5 ??= Md5Utils.getFileSliceMd5(filePath, 256 * 1024);
     return _sliceMd5!;
+  }
+
+  List<String>? _blockMd5List;
+
+  List<String> get blockMd5List {
+    if (_blockMd5List != null) {
+      return _blockMd5List!;
+    }
+
+    final blockSize = PanUtils.getBlockSize(memberLevel);
+    _blockMd5List ??= Md5Utils.getBlockList(
+      filePath,
+      blockSize,
+    );
+
+    return _blockMd5List!;
   }
 
   Map<String, dynamic> toMap() {
