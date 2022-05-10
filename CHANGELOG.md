@@ -10,6 +10,8 @@
   - uploadSpeed: 上传速度
   - getProgress: 上传进度
 
+- 支持秒传
+
 ## 1.0.4
 
 - 修复了一处 `BaiduUploadHelper` 恢复进度的 bug
