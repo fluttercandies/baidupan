@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 1.0.5
+## 1.1.0
 
 - 为上传的分块数据 [UploadPart] 添加了 `blockSize`, 用于表示分块大小。
 
