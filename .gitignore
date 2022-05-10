@@ -16,3 +16,4 @@ config.json
 curls
 
 output/
+pubspec.lock
