@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:baidupan/src/util/pan_utils.dart';
 import 'package:crypto/crypto.dart';
 
 class Md5Utils {
@@ -67,6 +68,68 @@ class Md5Utils {
     final result = md5.convert(buffer).toString();
     accessFile.closeSync();
     return result;
+  }
+}
+
+class BaiduMd5 {
+  final String filePath;
+  final int memberLevel;
+
+  BaiduMd5({
+    required this.filePath,
+    required this.memberLevel,
+  });
+
+  String? _contentMd5;
+
+  String get contentMd5 {
+    _contentMd5 ??= Md5Utils.getFileMd5(filePath);
+    return _contentMd5!;
+  }
+
+  String? _sliceMd5;
+
+  String get sliceMd5 {
+    _sliceMd5 ??= Md5Utils.getFileSliceMd5(filePath, 256 * 1024);
+    return _sliceMd5!;
+  }
+
+  List<String>? _blockMd5List;
+
+  List<String> get blockMd5List {
+    if (_blockMd5List != null) {
+      return _blockMd5List!;
+    }
+
+    final blockSize = PanUtils.getBlockSize(memberLevel);
+    _blockMd5List ??= Md5Utils.getBlockList(
+      filePath,
+      blockSize,
+    );
+
+    return _blockMd5List!;
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'filePath': filePath,
+      'memberLevel': memberLevel,
+      'blockMd5List': blockMd5List,
+      'contentMd5': contentMd5,
+      'sliceMd5': sliceMd5,
+    };
+  }
+
+  factory BaiduMd5.fromMap(Map<String, dynamic> map) {
+    final instance = BaiduMd5(
+      filePath: map['filePath'],
+      memberLevel: map['memberLevel'],
+    );
+    instance._blockMd5List =
+        (map['blockMd5List'] as List).whereType<String>().toList();
+    instance._contentMd5 = map['contentMd5'];
+    instance._sliceMd5 = map['sliceMd5'];
+    return instance;
   }
 }
 
