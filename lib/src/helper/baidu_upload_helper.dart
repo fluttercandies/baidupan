@@ -175,6 +175,9 @@ class BaiduUploadHelper with ILogger {
     final text = json.encode(progress);
     final bytes = utf8.encode(text);
     final file = File(filePath);
+    if (!file.existsSync()) {
+      file.createSync();
+    }
     file.writeAsBytesSync(bytes);
   }
 
@@ -211,7 +214,10 @@ class BaiduUploadHelper with ILogger {
   }
 
   Future<void> _upload(UploadHelperListener? uploadHandler) async {
-    final uploader = BaiduPanUploadManager(accessToken: accessToken);
+    final uploader = BaiduPanUploadManager(
+      accessToken: accessToken,
+      showLog: isShowLog,
+    );
 
     final preCreate = await uploader.preCreate(
       remotePath: remotePath,
@@ -224,7 +230,18 @@ class BaiduUploadHelper with ILogger {
       },
     );
 
+    if (preCreate.fastUpload) {
+      // 快速上传
+      uploadHandler?.onUploadComplete(this);
+      return;
+    }
+
     final uploadId = preCreate.uploadId;
+
+    if (uploadId == null) {
+      throw Exception('uploadId is null');
+    }
+
     _uploadId = uploadId;
 
     totalBlockCount = preCreate.blockList.length;

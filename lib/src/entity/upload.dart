@@ -9,9 +9,12 @@ class PreCreate {
   final List<int> blockList;
   final int errno;
   final int requestId;
-  final String uploadId;
+  final String? uploadId;
 
-  PreCreate({
+  // 秒传
+  bool get fastUpload => uploadId == null && blockList.isEmpty;
+
+  const PreCreate({
     required this.path,
     required this.returnType,
     required this.blockList,
@@ -20,7 +23,7 @@ class PreCreate {
     required this.uploadId,
   });
 
-  factory PreCreate.fromJson(Map json) {
+  static PreCreate fromJson(Map json) {
     List<int> blockList;
     final blockJson = json['block_list'];
     if (blockJson != null) {
