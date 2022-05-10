@@ -122,10 +122,6 @@ class BaiduUploadHelper with ILogger {
 
   /// 获取应该被保存的 map
   Map<String, dynamic> getSaveProgressMap() {
-    if (_uploadId == null) {
-      throw Exception('uploadId is null, please call startUpload() first');
-    }
-
     return {
       'uploadId': _uploadId,
       'localPath': localPath,
