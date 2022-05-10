@@ -19,10 +19,11 @@ class BaiduUploadHelper with ILogger {
     required String localPath,
     required this.remotePath,
     required this.memberLevel,
-  }) : localPath = File(localPath).absolute.path;
+  })  : localPath = File(localPath).absolute.path,
+        lastModified = File(localPath).lastModifiedSync();
 
   /// [accessToken] 百度网盘的token
-  /// [resumeMap] 续传的map, 一般由 [saveProgress] 返回
+  /// [resumeMap] 续传的map, 一般由 [getSaveProgressMap] 返回
   factory BaiduUploadHelper.resumeFromMap({
     required String accessToken,
     required Map resumeMap,
@@ -75,6 +76,8 @@ class BaiduUploadHelper with ILogger {
     return _md5!;
   }
 
+  DateTime lastModified;
+
   bool _isUploading = false;
 
   /// 是否正在上传
@@ -118,7 +121,7 @@ class BaiduUploadHelper with ILogger {
   }
 
   /// 获取应该被保存的 map
-  Map<String, dynamic> saveProgress() {
+  Map<String, dynamic> getSaveProgressMap() {
     if (_uploadId == null) {
       throw Exception('uploadId is null, please call startUpload() first');
     }
@@ -131,6 +134,7 @@ class BaiduUploadHelper with ILogger {
       'saveFileLength': fileTotalSize,
       'md5': md5.toMap(),
       'uploadCount': uploadCount,
+      'lastModified': lastModified.millisecondsSinceEpoch,
     };
   }
 
@@ -140,6 +144,12 @@ class BaiduUploadHelper with ILogger {
     final remotePath = progress['remotePath'] as String;
     final memberLevel = progress['memberLevel'] as int;
     final saveFileLength = progress['saveFileLength'] as int;
+
+    final lastModifiedMs = progress['lastModified'] as int;
+
+    if (lastModifiedMs != lastModified.millisecondsSinceEpoch) {
+      throw Exception('修改时间不一致，可能文件被修改过，不支持续传');
+    }
 
     if (saveFileLength != fileTotalSize) {
       throw Exception('文件大小不一致，可能文件已经被修改，不支持续传');
@@ -165,7 +175,7 @@ class BaiduUploadHelper with ILogger {
 
   /// 保存进度到文件
   void saveProgressToFile(String filePath) {
-    final progress = saveProgress();
+    final progress = getSaveProgressMap();
     final text = json.encode(progress);
     final bytes = utf8.encode(text);
     final file = File(filePath);
