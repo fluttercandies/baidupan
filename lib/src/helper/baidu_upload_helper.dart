@@ -74,6 +74,15 @@ class BaiduUploadHelper with ILogger {
   /// 上传的文件 md5 值， 保存进度的一部分
   BaiduMd5? _md5;
 
+  BaiduMd5 get md5 {
+    _md5 ??= BaiduMd5(
+      filePath: localPath,
+      memberLevel: memberLevel,
+    );
+
+    return _md5!;
+  }
+
   bool _isUploading = false;
 
   /// 是否正在上传
@@ -116,11 +125,11 @@ class BaiduUploadHelper with ILogger {
     return {
       'uploadId': _uploadId,
       'uploadedBlocks': uploadedBlocks.map((e) => e.toJson()).toList(),
-      'localPath': localPath,
+      'localPath': File(localPath).absolute.path,
       'remotePath': remotePath,
       'memberLevel': memberLevel,
       'saveFileLength': fileTotalSize,
-      'md5': _md5?.toMap(),
+      'md5': md5.toMap(),
     };
   }
 
@@ -201,14 +210,17 @@ class BaiduUploadHelper with ILogger {
   Future<void> _upload(UploadHelperListener? uploadHandler) async {
     final uploader = BaiduPanUploadManager(accessToken: accessToken);
 
-    _md5 ??= BaiduMd5(filePath: localPath, memberLevel: memberLevel);
+    final localPath = File(this.localPath).absolute.path;
 
     final preCreate = await uploader.preCreate(
       remotePath: remotePath,
       localPath: localPath,
       memberLevel: memberLevel,
       uploadid: _uploadId,
-      md5: _md5,
+      md5: md5,
+      onMd5Calculated: (md5) {
+        uploadHandler?.onLocalMd5Complete(this);
+      },
     );
 
     final uploadId = preCreate.uploadId;
@@ -275,6 +287,9 @@ class BaiduUploadHelper with ILogger {
 mixin UploadHelperListener {
   /// 上传开始
   void onUploadStart(BaiduUploadHelper helper) {}
+
+  /// 计算完 md5 后的回调
+  void onLocalMd5Complete(BaiduUploadHelper helper) {}
 
   /// 一个块上传完成的回调
   ///

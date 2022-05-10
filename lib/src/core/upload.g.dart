@@ -1,5 +1,7 @@
 part of 'pan.dart';
 
+typedef Md5Calculated = void Function(BaiduMd5 md5);
+
 /// 处理上传文件
 ///
 /// 具体的上传能力和限制请参考 [官网](https://pan.baidu.com/union/doc/3ksg0s9ye)
@@ -44,6 +46,7 @@ class BaiduPanUploadManager with BaiduPanMixin {
   /// [rtype] 为重命名策略
   /// [uploadid] 为上传的id, 这个是远端的上传id，理论上是用于后续的分片上传
   /// [memberLevel] 为用户的会员等级，这个等级决定了可以上传多大的文件和切片规则
+  /// [md5Calculated] 为md5计算完成后的回调，用于获取到md5值
   ///
   Future<PreCreate> preCreate({
     required String remotePath,
@@ -52,6 +55,7 @@ class BaiduPanUploadManager with BaiduPanMixin {
     required int memberLevel,
     String? uploadid,
     BaiduMd5? md5,
+    Md5Calculated? onMd5Calculated,
   }) async {
     final path = 'rest/2.0/xpan/file';
     final method = 'precreate';
@@ -112,6 +116,8 @@ class BaiduPanUploadManager with BaiduPanMixin {
 
     body['content-md5'] = baiduMd5.contentMd5;
     body['slice-md5'] = baiduMd5.sliceMd5;
+
+    onMd5Calculated?.call(baiduMd5);
 
     final now = DateTime.now().millisecondsSinceEpoch / 1000;
     body['local_ctime'] = now.toString();
