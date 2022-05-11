@@ -232,7 +232,6 @@ class BaiduUploadHelper with ILogger {
 
     if (preCreate.fastUpload) {
       // 快速上传
-      uploadHandler?.onUploadComplete(this);
       return;
     }
 
