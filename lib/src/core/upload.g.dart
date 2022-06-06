@@ -173,6 +173,7 @@ class BaiduPanUploadManager with BaiduPanMixin {
 
     accessFile.setPositionSync(start);
     final readBufferSize = accessFile.readIntoSync(buffer, 0, bufferSize);
+    accessFile.closeSync();
     final uploadBytes = buffer.sublist(0, readBufferSize);
 
     final fileName = Uri.file(remotePath).pathSegments.last;
