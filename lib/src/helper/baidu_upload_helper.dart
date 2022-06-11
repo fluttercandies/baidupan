@@ -19,6 +19,7 @@ class BaiduUploadHelper with ILogger {
     required String localPath,
     required this.remotePath,
     required this.memberLevel,
+    this.totalRetryCount = 10,
   })  : localPath = File(localPath).absolute.path,
         lastModified = File(localPath).lastModifiedSync();
 
@@ -63,6 +64,9 @@ class BaiduUploadHelper with ILogger {
 
   /// 会员等级： 0 为非会员，1 为普通会员，2 为超级会员， 保存进度的一部分
   final int memberLevel;
+
+  /// 重试次数
+  final int totalRetryCount;
 
   /// 上传的文件 md5 值， 保存进度的一部分
   BaiduMd5? _md5;
@@ -192,6 +196,8 @@ class BaiduUploadHelper with ILogger {
     resumeProgressInfo(progress);
   }
 
+  int _currentRetryCount = 0;
+
   /// 开始上传
   Future<void> startUpload([UploadHelperListener? uploadHandler]) async {
     if (isUploading) {
@@ -204,12 +210,17 @@ class BaiduUploadHelper with ILogger {
       uploadHandler?.onUploadComplete(this);
       _isUploading = false;
     } catch (e, st) {
+      _isUploading = false;
       if (uploadHandler != null) {
         uploadHandler.onUploadError(this, e, st);
       } else {
         logError('上传出错', e, st);
       }
-      _isUploading = false;
+      _currentRetryCount++;
+      if (_currentRetryCount < totalRetryCount) {
+        await Future.delayed(Duration(seconds: 1));
+        await startUpload(uploadHandler);
+      }
     }
   }
 
