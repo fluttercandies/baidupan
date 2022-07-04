@@ -22,17 +22,13 @@ mixin BaiduPanMixin {
   Future<Map<String, dynamic>> _get(
     String path, {
     Map<String, String> params = const {},
+    Map<String, String> headers = const {},
   }) async {
-    final uri = Uri.parse('$_baseUrl/$path').replace(queryParameters: {
-      ...params,
-      'access_token': accessToken,
-    });
-
-    final response = await http.get(uri);
+    final response = await _getResponse(path, params: params, headers: headers);
     final map = json.decode(response.body);
 
     if (showLog) {
-      print('uri: $uri');
+      print('uri: ${response.request?.url}');
       print('response body: ${response.body}');
     }
 
@@ -40,6 +36,19 @@ mixin BaiduPanMixin {
       throw Exception(map['errmsg']);
     }
     return map;
+  }
+
+  Future<http.Response> _getResponse(
+    String path, {
+    Map<String, String> params = const {},
+    Map<String, String> headers = const {},
+  }) async {
+    final uri = Uri.parse('$_baseUrl/$path').replace(queryParameters: {
+      ...params,
+      'access_token': accessToken,
+    });
+
+    return http.get(uri, headers: headers);
   }
 
   Future<Map> _post({
@@ -465,6 +474,56 @@ class BaiduPan with BaiduPanMixin {
 
     final map = await _get(path, params: param);
     return SearchList.fromJson(map);
+  }
+
+  /// 获取音视频流的文本内容
+  ///
+  /// 参数查看 [官方文档](https://pan.baidu.com/union/doc/ll1hhaox3)
+  Future<http.Response> getMediaStreamText({
+    required String filePath,
+    MediaRequestType type = MediaRequestType.M3U8_AUTO_1080,
+  }) async {
+    final path = 'rest/2.0/xpan/file';
+    final param = <String, String>{
+      'method': 'streaming',
+      'path': filePath,
+      'access_token': accessToken,
+      'type': type.value,
+    };
+
+    final header = <String, String>{
+      'User-Agent': 'xpanvideo;netdisk;iPhone13;ios-iphone;15.1;ts',
+      'host': 'pan.baidu.com',
+    };
+
+    return _getResponse(
+      path,
+      params: param,
+      headers: header,
+    );
+  }
+
+  /// 获取音视频流的Uri
+  ///
+  /// 因为需要拼接 [accessToken], 所以如果直接暴露会暴露 [accessToken] 的内容, 从而造成安全问题.
+  ///
+  /// 建议使用 [getMediaStreamText] 方法获取音视频流的文本内容. 然后储存到文件中，然后提供给用户脱敏的 Uri.
+  /// m3u8 文件的响应头请将响应头的 ContentType 设置为 `application/x-mpegURL`.
+  Uri getMediaStreamUri({
+    required String filePath,
+    MediaRequestType type = MediaRequestType.M3U8_AUTO_1080,
+  }) {
+    return Uri(
+      scheme: 'https',
+      host: 'pan.baidu.com',
+      path: 'rest/2.0/xpan/file',
+      queryParameters: <String, String>{
+        'method': 'streaming',
+        'path': filePath,
+        'access_token': accessToken,
+        'type': type.value,
+      },
+    );
   }
 }
 

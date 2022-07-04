@@ -18,3 +18,4 @@ export 'src/util/md5_utils.dart';
 export 'src/util/auth_utils.dart';
 export 'src/util/logger.dart';
 export 'src/helper/baidu_upload_helper.dart';
+export 'src/entity/stream_request_type.dart';
