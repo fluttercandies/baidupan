@@ -6,7 +6,7 @@
 /// |M3U8_FLV_264_480|xpanvideo;$appName;$appVersion;$sysName;$sysVersion;flv|视频flv|480p|私有协议，需播放器额外特殊支持，或使用网盘播放器|
 /// |M3U8_MP3_128|xpanaudio;$appName;$appVersion;$sysName;$sysVersion;mp3|音频mp3|  | 私有协议，需播放器额外支持，或使用网盘播放器|
 /// |M3U8_HLS_MP3_128|xpanaudio;$appName;$appVersion;$sysName;$sysVersion;ts|音频ts| | 通用hls协议|
-enum MediaRequestType {
+enum BaiduMediaRequestType {
   /// M3U8_AUTO_480
   M3U8_AUTO_480,
 
@@ -26,20 +26,20 @@ enum MediaRequestType {
   M3U8_HLS_MP3_128,
 }
 
-extension MediaRequestTypeExtension on MediaRequestType {
+extension MediaRequestTypeExtension on BaiduMediaRequestType {
   String get value {
     switch (this) {
-      case MediaRequestType.M3U8_AUTO_480:
+      case BaiduMediaRequestType.M3U8_AUTO_480:
         return 'M3U8_AUTO_480';
-      case MediaRequestType.M3U8_AUTO_720:
+      case BaiduMediaRequestType.M3U8_AUTO_720:
         return 'M3U8_AUTO_720';
-      case MediaRequestType.M3U8_AUTO_1080:
+      case BaiduMediaRequestType.M3U8_AUTO_1080:
         return 'M3U8_AUTO_1080';
-      case MediaRequestType.M3U8_FLV_264_480:
+      case BaiduMediaRequestType.M3U8_FLV_264_480:
         return 'M3U8_FLV_264_480';
-      case MediaRequestType.M3U8_MP3_128:
+      case BaiduMediaRequestType.M3U8_MP3_128:
         return 'M3U8_MP3_128';
-      case MediaRequestType.M3U8_HLS_MP3_128:
+      case BaiduMediaRequestType.M3U8_HLS_MP3_128:
         return 'M3U8_HLS_MP3_128';
       default:
         return '';

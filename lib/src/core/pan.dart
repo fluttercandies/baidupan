@@ -14,6 +14,7 @@ part 'download.g.dart';
 
 String get _baseUrl => 'https://pan.baidu.com';
 
+/// 混入类，用于提供百度网盘的管理功能
 mixin BaiduPanMixin {
   String get accessToken;
 
@@ -476,12 +477,15 @@ class BaiduPan with BaiduPanMixin {
     return SearchList.fromJson(map);
   }
 
-  /// 获取音视频流的文本内容
+  /// 获取音视频流的响应。
   ///
-  /// 参数查看 [官方文档](https://pan.baidu.com/union/doc/ll1hhaox3)
-  Future<http.Response> getMediaStreamText({
+  /// [filePath] 为网盘文件的路径。
+  /// [type] 为音视频流的类型，查看[BaiduMediaRequestType]。
+  ///
+  /// 具体参数说明查看 [官方文档](https://pan.baidu.com/union/doc/ll1hhaox3)
+  Future<http.Response> getMediaStreamResponse({
     required String filePath,
-    MediaRequestType type = MediaRequestType.M3U8_AUTO_1080,
+    BaiduMediaRequestType type = BaiduMediaRequestType.M3U8_AUTO_1080,
   }) async {
     final path = 'rest/2.0/xpan/file';
     final param = <String, String>{
@@ -503,15 +507,17 @@ class BaiduPan with BaiduPanMixin {
     );
   }
 
-  /// 获取音视频流的Uri
+  /// 获取音视频流的 [Uri]。
   ///
-  /// 因为需要拼接 [accessToken], 所以如果直接暴露会暴露 [accessToken] 的内容, 从而造成安全问题.
+  /// 因为需要拼接 [accessToken]，所以如果直接暴露会暴露 [accessToken] 的内容。
+  /// 所以，不要把这个方法的返回值分享给其他人。
   ///
-  /// 建议使用 [getMediaStreamText] 方法获取音视频流的文本内容. 然后储存到文件中，然后提供给用户脱敏的 Uri.
-  /// m3u8 文件的响应头请将响应头的 ContentType 设置为 `application/x-mpegURL`.
+  /// 如果是用于服务器使用，建议使用 [getMediaStreamResponse] 方法获取音视频流的文本内容. 然后储存到文件中，然后提供给用户脱敏的 Uri.
+  ///
+  /// 另，需要将 m3u8 文件的响应头请将响应头的 ContentType 设置为 `application/x-mpegURL`.
   Uri getMediaStreamUri({
     required String filePath,
-    MediaRequestType type = MediaRequestType.M3U8_AUTO_1080,
+    BaiduMediaRequestType type = BaiduMediaRequestType.M3U8_AUTO_1080,
   }) {
     return Uri(
       scheme: 'https',
