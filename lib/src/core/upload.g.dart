@@ -114,7 +114,7 @@ class BaiduPanUploadManager with BaiduPanMixin {
 
     body['block_list'] = json.encode(blockMd5);
 
-    body['content-md5'] = baiduMd5.contentMd5;
+    body['content-md5'] = await baiduMd5.contentMd5;
     body['slice-md5'] = baiduMd5.sliceMd5;
 
     onMd5Calculated?.call(baiduMd5);

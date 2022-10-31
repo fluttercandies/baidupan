@@ -3,34 +3,31 @@ import 'dart:io';
 import 'package:baidupan/src/util/pan_utils.dart';
 import 'package:crypto/crypto.dart';
 
+typedef Md5FileConverter = Future<String> Function(String path);
+
 class Md5Utils {
   const Md5Utils._();
 
-  static String getFileMd5(String filePath, [int blockSize = 1024 * 1024]) {
-    final file = File(filePath);
-    return md5.convert(file.readAsBytesSync()).toString();
+  static Md5FileConverter md5Converter = md5FileUseBytes;
 
-    // final accessFile = file.openSync(mode: FileMode.read);
-    //
-    // file.readAsBytesSync();
-    //
-    // Digest? digest;
-    //
-    // // 循环分块读取accessFile
-    // do {
-    //   final block = accessFile.readSync(blockSize);
-    //   // final u32List = block.buffer.asUint32List();
-    //   // final u32List = block.buffer.asUint16List();
-    //   if (block.isEmpty) {
-    //     break;
-    //   }
-    //   print('block length: ${block.length}');
-    //   digest = _convert(block);
-    // } while (true);
-    //
-    // accessFile.closeSync();
-    //
-    // return digest.toString();
+  static Future<String> getFileMd5(String filePath,
+      [int blockSize = 1024 * 1024]) async {
+    return md5Converter(filePath);
+  }
+
+  static Future<String> md5FileUseBytes(String filePath,
+      [int blockSize = 1024 * 1024]) async {
+    final file = File(filePath);
+    return (await md5.bind(file.openRead()).first).toString();
+  }
+
+  static Future<String> md5FileUseCmd(String path) async {
+    final tools = 'md5sum';
+
+    final result = Process.runSync(tools, [path]);
+    // 获取输出结果
+    final output = result.stdout as String;
+    return output.split(' ').first;
   }
 
   static List<String> getBlockList(
@@ -82,8 +79,8 @@ class BaiduMd5 {
 
   String? _contentMd5;
 
-  String get contentMd5 {
-    _contentMd5 ??= Md5Utils.getFileMd5(filePath);
+  Future<String> get contentMd5 async {
+    _contentMd5 ??= (await Md5Utils.getFileMd5(filePath));
     return _contentMd5!;
   }
 
