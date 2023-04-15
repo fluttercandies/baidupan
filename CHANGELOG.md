@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.1.5
+
+- 修复了一处未关闭的 `RandomAccessFile` 的内存泄露问题. [#5](https://github.com/fluttercandies/baidupan/pull/5)
+
 ## 1.1.4
 
 获取大文件的 md5 进行优化，可以分块获取，不会一次性读取大文件，导致内存溢出。
