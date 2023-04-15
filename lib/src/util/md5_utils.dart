@@ -46,6 +46,8 @@ class Md5Utils {
       result.add(md5.convert(block).toString());
     }
 
+    accessFile.closeSync();
+
     return result;
   }
 
