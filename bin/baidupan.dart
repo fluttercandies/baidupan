@@ -40,7 +40,7 @@ Future<void> main(List<String> arguments) async {
 }
 
 Future<void> createFolder(BaiduAuth auth) async {
-  final manager = BaiduPanFileManager(auth.accessToken,showLog: true);
+  final manager = BaiduPanFileManager(auth.accessToken, showLog: true);
   final result = await manager.createFolder(path: '/test-create-by-api');
   print(json.encode(result));
 }
