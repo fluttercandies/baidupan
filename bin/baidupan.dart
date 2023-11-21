@@ -14,7 +14,7 @@ Future<void> main(List<String> arguments) async {
 
   final baiduPan = BaiduPan.withAuth(auth, showLog: true);
 
-  // baiduPan.getUserInfo().then((userInfo) {
+  // await baiduPan.getUserInfo().then((userInfo) {
   //   print(userInfo);
   // });
 
@@ -32,9 +32,17 @@ Future<void> main(List<String> arguments) async {
 
   // _getCategoryList(baiduPan);
 
-  _searchAndDownload(baiduPan);
+  // _searchAndDownload(baiduPan);
 
   // await _managerExample(auth);
+
+  await createFolder(auth);
+}
+
+Future<void> createFolder(BaiduAuth auth) async {
+  final manager = BaiduPanFileManager(auth.accessToken,showLog: true);
+  final result = await manager.createFolder(path: '/test-create-by-api');
+  print(json.encode(result));
 }
 
 Future<void> _managerExample(BaiduAuth auth) async {

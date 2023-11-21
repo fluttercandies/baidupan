@@ -16,7 +16,7 @@ class BaiduPanFileManager with BaiduPanMixin {
   final bool showLog;
 
   /// 复制
-  Future<void> copy(
+  Future<Map> copy(
     List<CopyOrMoveItem> items, {
     OnDuplicateAction? onDuplicateAction,
   }) async {
@@ -34,11 +34,11 @@ class BaiduPanFileManager with BaiduPanMixin {
       bodyParams['ondup'] = onDuplicateAction.value;
     }
 
-    await _post(params: params, bodyParams: bodyParams);
+    return _post(params: params, bodyParams: bodyParams);
   }
 
   /// 移动
-  Future<void> move(
+  Future<Map> move(
     List<CopyOrMoveItem> items, {
     OnDuplicateAction? onDuplicateAction,
   }) async {
@@ -56,11 +56,11 @@ class BaiduPanFileManager with BaiduPanMixin {
       bodyParams['ondup'] = onDuplicateAction.value;
     }
 
-    await _post(params: params, bodyParams: bodyParams);
+    return _post(params: params, bodyParams: bodyParams);
   }
 
   /// 重命名
-  Future<void> rename(
+  Future<Map> rename(
     List<RenameItem> items, {
     OnDuplicateAction? onDuplicateAction,
   }) async {
@@ -78,11 +78,11 @@ class BaiduPanFileManager with BaiduPanMixin {
       bodyParams['ondup'] = onDuplicateAction.value;
     }
 
-    await _post(params: params, bodyParams: bodyParams);
+    return _post(params: params, bodyParams: bodyParams);
   }
 
   /// 删除
-  Future<void> delete(
+  Future<Map> delete(
     List<String> items, {
     OnDuplicateAction? onDuplicateAction,
   }) async {
@@ -98,7 +98,39 @@ class BaiduPanFileManager with BaiduPanMixin {
       bodyParams['ondup'] = onDuplicateAction.value;
     }
 
-    await _post(params: params, bodyParams: bodyParams);
+    return _post(params: params, bodyParams: bodyParams);
+  }
+
+  /// 创建文件夹
+  ///
+  /// [path] 为绝对路径，必须以 / 开头
+  ///
+  Future<Map> createFolder({
+    required String path,
+    OnDuplicateAction onDuplicateAction = OnDuplicateAction.fail,
+    DateTime? createTime,
+    DateTime? modifyTime,
+  }) {
+    final bodyParams = <String, String>{
+      'path': Uri.encodeComponent(path),
+      'isdir': '1',
+      'rtype': onDuplicateAction.rtype.toString(),
+    };
+
+    if (createTime != null) {
+      bodyParams['local_ctime'] =
+          (createTime.millisecondsSinceEpoch ~/ 1000).toString();
+    }
+
+    if (modifyTime != null) {
+      bodyParams['local_mtime'] =
+          (modifyTime.millisecondsSinceEpoch ~/ 1000).toString();
+    }
+
+    return _post(
+      method: 'create',
+      bodyParams: bodyParams,
+    );
   }
 }
 
@@ -147,7 +179,7 @@ class CopyOrMoveItem {
   }
 }
 
-/// fail(默认，直接返回失败)、newcopy(重命名文件)、overwrite、skip
+/// fail(默认，直接返回失败)、newcopy(重命名文件)、overwrite(覆写）、skip（跳过）
 enum OnDuplicateAction {
   fail,
   newcopy,
@@ -166,6 +198,19 @@ extension OnDuplicateExt on OnDuplicateAction {
         return 'overwrite';
       case OnDuplicateAction.skip:
         return 'skip';
+    }
+  }
+
+  int get rtype {
+    switch (this) {
+      case OnDuplicateAction.fail:
+        return 0;
+      case OnDuplicateAction.newcopy:
+        return 1;
+      case OnDuplicateAction.skip:
+        return 2;
+      case OnDuplicateAction.overwrite:
+        return 3;
     }
   }
 }

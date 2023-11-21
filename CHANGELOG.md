@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.2.0
+
+- 添加了新的接口: `createFolder` for `BaiduPanFileManager`.
+
 ## 1.1.5
 
 - 修复了一处未关闭的 `RandomAccessFile` 的内存泄露问题. [#5](https://github.com/fluttercandies/baidupan/pull/5)
