@@ -27,6 +27,7 @@ class PreCreate {
     List<int> blockList;
     final blockJson = json['block_list'];
     if (blockJson != null) {
+      // ignore: no_leading_underscores_for_local_identifiers
       final _blockValue = blockJson as List;
       blockList = _blockValue.whereType<int>().toList();
     } else {

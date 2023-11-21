@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:baidupan/baidupan.dart';
-import 'package:baidupan/src/util/pan_utils.dart';
 
 /// 对于上传百度网盘的包装类
 ///

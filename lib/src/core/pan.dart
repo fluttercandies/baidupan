@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:baidupan/src/util/pan_utils.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:baidupan/baidupan.dart';
