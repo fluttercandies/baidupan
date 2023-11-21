@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - master
     paths:
       - lib/**.dart
       - bin/**.dart
