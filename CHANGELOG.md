@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 1.2.1
+
+- 修改了 README，添加了 `createFolder` 到功能列表中。
+- 更新了 dart sdk 的版本依赖到 `>=2.12.0 <4.0.0`
+- 更新了各种依赖的版本
+
 ## 1.2.0
 
 - 添加了新的接口: `createFolder` for `BaiduPanFileManager`.

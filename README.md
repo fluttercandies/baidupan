@@ -75,6 +75,7 @@ void main() async {
   - `move`: 移动文件
   - `rename`: 重命名文件
   - `delete`: 删除文件
+  - `createFolder`: 创建文件夹
 - `BaiduPanUploadManager`: 上传文件的管理类
   - `preCreate`: 预创建文件
   - `uploadSinglePart`: 上传分片文件
