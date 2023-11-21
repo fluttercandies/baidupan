@@ -1,0 +1,7 @@
+index_generator:
+  exclude:
+    - "**.g.dart"
+  # Define the paths of the folders in which to generate the index files
+  indexes:
+    - path: lib
+# Use `index_generator` or `dart pub global run index_generator` to generate the index files
