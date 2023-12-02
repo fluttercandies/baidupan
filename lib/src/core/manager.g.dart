@@ -7,6 +7,7 @@ class BaiduPanFileManager with BaiduPanMixin {
   const BaiduPanFileManager(
     this.accessToken, {
     this.showLog = false,
+    this.secretAccessToken = false,
   });
 
   @override
@@ -14,6 +15,9 @@ class BaiduPanFileManager with BaiduPanMixin {
 
   @override
   final bool showLog;
+
+  @override
+  final bool secretAccessToken;
 
   /// 复制
   Future<Map> copy(

@@ -13,11 +13,39 @@ part 'download.g.dart';
 
 String get _baseUrl => 'https://pan.baidu.com';
 
+extension _UriExt on Uri {
+  /// 把 accessToken 在日志中打码
+  Uri? _secretAccessToken() {
+    final origin = this;
+    final queryParameters = Map<String, String>.from(origin.queryParameters);
+    if (queryParameters.containsKey('access_token')) {
+      queryParameters['access_token'] = '-secret-';
+    }
+    return origin.replace(queryParameters: queryParameters);
+  }
+}
+
 /// 混入类，用于提供百度网盘的管理功能
 mixin BaiduPanMixin {
   String get accessToken;
 
   bool get showLog;
+  bool get secretAccessToken;
+
+  Uri? _logUri(http.Response response) {
+    if (secretAccessToken) {
+      return response.request?.url._secretAccessToken();
+    }
+    return response.request?.url;
+  }
+
+  String _requestHeaders(http.Response response) {
+    final headers = response.request?.headers;
+    if (headers == null) {
+      return '';
+    }
+    return headers.entries.map((e) => '${e.key}: ${e.value}').join('\n');
+  }
 
   Future<Map<String, dynamic>> _get(
     String path, {
@@ -28,7 +56,9 @@ mixin BaiduPanMixin {
     final map = json.decode(response.body);
 
     if (showLog) {
-      print('uri: ${response.request?.url}');
+      print('uri: ${_logUri(response)}');
+      print('method: GET');
+      print('headers: ${_requestHeaders(response)}');
       print('response body: ${response.body}');
     }
 
@@ -73,15 +103,19 @@ mixin BaiduPanMixin {
     final response = await http.post(
       uri,
       body: body,
-      // headers: headers,
       encoding: utf8,
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
     );
     var responseBody = response.body;
     final map = json.decode(responseBody);
 
     if (showLog) {
-      print('uri: $uri');
+      print('uri: ${_logUri(response)}');
+      print('method: POST');
       print('body: $body');
+      print('headers: ${_requestHeaders(response)}');
       print('response body: $responseBody');
     }
 
@@ -106,6 +140,7 @@ class BaiduPan with BaiduPanMixin {
   const BaiduPan(
     this.accessToken, {
     this.showLog = false,
+    this.secretAccessToken = false,
   });
 
   factory BaiduPan.withAuth(BaiduAuth auth, {bool showLog = false}) {
@@ -117,6 +152,9 @@ class BaiduPan with BaiduPanMixin {
 
   @override
   final bool showLog;
+
+  @override
+  final bool secretAccessToken;
 
   /// 用户信息，包括账号、头像地址、会员类型等。
   ///

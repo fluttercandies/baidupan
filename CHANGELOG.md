@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.2.2
+
+- 所有 post 请求头中强制使用 `Content-Type: application/x-www-form-urlencoded`. (#11)，顺便可能修复 #9 问题。
+
 ## 1.2.1
 
 - 修改了 README，添加了 `createFolder` 到功能列表中。

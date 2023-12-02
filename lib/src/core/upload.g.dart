@@ -29,6 +29,7 @@ class BaiduPanUploadManager with BaiduPanMixin {
   const BaiduPanUploadManager({
     required this.accessToken,
     this.showLog = false,
+    this.secretAccessToken = false,
   });
 
   @override
@@ -36,6 +37,9 @@ class BaiduPanUploadManager with BaiduPanMixin {
 
   @override
   final bool showLog;
+
+  @override
+  final bool secretAccessToken;
 
   // final String appName;
 
